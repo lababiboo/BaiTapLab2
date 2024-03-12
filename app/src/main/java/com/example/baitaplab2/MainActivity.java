@@ -27,6 +27,7 @@ import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
+    private MyDB db;
     private Button btnAdd;
     private Button btnDelete;
     private ListView lstContact;
@@ -55,11 +56,21 @@ public class MainActivity extends AppCompatActivity {
 
         registerForContextMenu(lstContact);
 
+        db = new MyDB(this, "ContactDB", null,1);
         ContactList = new ArrayList<>();
-        ContactList.add(new Contact(1,"Park Chaeyoung","0987654321","a1@gmail.com","https://media.vov.vn/sites/default/files/styles/large/public/2023-09/4_47.jpg",false));
-        ContactList.add(new Contact(2,"Kim Jisoo","0987654321","a2@gmail.com","https://i.pinimg.com/originals/4b/7b/a6/4b7ba64d0bd06cd071929e0ac48694f6.jpg",true));
-        ContactList.add(new Contact(3,"Kim Jennie","0987654321","a3@gmail.com","https://i.pinimg.com/originals/dc/16/18/dc1618c466e42be9797cc031fa64a576.jpg",false));
-        ContactList.add(new Contact(4,"Kim Jennie","0987654321","a3@gmail.com","/storage/emulated/0/Download/6168e-16550201091769-1920.jpg",false));
+//        ContactList.add(new Contact(1,"Park Chaeyoung","0987654321","a1@gmail.com","https://media.vov.vn/sites/default/files/styles/large/public/2023-09/4_47.jpg",false));
+//        ContactList.add(new Contact(2,"Kim Jisoo","0987654321","a2@gmail.com","https://i.pinimg.com/originals/4b/7b/a6/4b7ba64d0bd06cd071929e0ac48694f6.jpg",true));
+//        ContactList.add(new Contact(3,"Kim Jennie","0987654321","a3@gmail.com","https://i.pinimg.com/originals/dc/16/18/dc1618c466e42be9797cc031fa64a576.jpg",false));
+//        ContactList.add(new Contact(4,"Kim Jennie","0987654321","a3@gmail.com","/storage/emulated/0/Download/6168e-16550201091769-1920.jpg",false));
+
+//        db.addContact(new Contact(1,"Park Chaeyoung","0987654321","a1@gmail.com","https://media.vov.vn/sites/default/files/styles/large/public/2023-09/4_47.jpg",false));
+//        db.addContact(new Contact(2,"Kim Jisoo","0987654321","a2@gmail.com","https://i.pinimg.com/originals/4b/7b/a6/4b7ba64d0bd06cd071929e0ac48694f6.jpg",true));
+//        db.addContact(new Contact(3,"Kim Jennie","0987654321","a3@gmail.com","https://i.pinimg.com/originals/dc/16/18/dc1618c466e42be9797cc031fa64a576.jpg",false));
+//        db.addContact(new Contact(4,"Kim Jennie","0987654321","a3@gmail.com","/storage/emulated/0/Download/6168e-16550201091769-1920.jpg",false));
+
+
+
+        ContactList = db.getAllContact();
 
         ListAdapter = new Adapter(ContactList,this);
         lstContact.setAdapter(ListAdapter);
@@ -77,9 +88,14 @@ public class MainActivity extends AppCompatActivity {
                         while(iterator.hasNext()){
                             Contact x = iterator.next();
                             if(x.getStatus())
+                            {
                                 iterator.remove();
+                                db.deleteContact(x.getId());
+                            }
                         }
-                        ListAdapter.notifyDataSetChanged();
+                        ContactList = db.getAllContact();
+                        ListAdapter = new Adapter(ContactList,MainActivity.this);
+                        lstContact.setAdapter(ListAdapter);
                     }
                 });
 
@@ -125,8 +141,11 @@ public class MainActivity extends AppCompatActivity {
             Boolean status = b.getBoolean("Status");
             Contact newcontact = new Contact(id,name,phone,email,img,status);
             Log.d("a-main", "onActivityResult: "+ img);
-            ContactList.add(newcontact);
-            ListAdapter.notifyDataSetChanged();
+            //ContactList.add(newcontact);
+            db.addContact(newcontact);
+            ContactList = db.getAllContact();
+            ListAdapter = new Adapter(ContactList,this);
+            lstContact.setAdapter(ListAdapter);
         }
         if(requestCode == 200 && resultCode==150){
             Bundle b = data.getExtras();
@@ -137,8 +156,11 @@ public class MainActivity extends AppCompatActivity {
             String img = b.getString("Image");
             Boolean status = b.getBoolean("Status");
             Contact newcontact = new Contact(id,name,phone,email,img,status);
-            ContactList.set(SelectedItemId,newcontact);
-            ListAdapter.notifyDataSetChanged();
+            //ContactList.set(SelectedItemId,newcontact);
+            db.updateContact(id,newcontact);
+            ContactList = db.getAllContact();
+            ListAdapter = new Adapter(ContactList,this);
+            lstContact.setAdapter(ListAdapter);
         }
     }
 
@@ -154,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         Contact c = ContactList.get(SelectedItemId);
         if(item.getItemId()== R.id.mnuEdit){
-
             Intent intent = new Intent(MainActivity.this, Add.class);
             Bundle b = new Bundle();
             b.putInt("Id",c.getId());

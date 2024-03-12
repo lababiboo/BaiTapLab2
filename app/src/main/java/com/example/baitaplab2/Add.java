@@ -29,6 +29,7 @@ public class Add extends AppCompatActivity {
     private CheckBox cbStatus;
     private ImageView img;
     private String uri_img;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +50,7 @@ public class Add extends AppCompatActivity {
         if(b!=null){
             int id = b.getInt("Id");
             String image = b.getString("Image");
+            uri_img = image;
             String name = b.getString("Name");
             String phone = b.getString("Phone");
             String email = b.getString("Email");
